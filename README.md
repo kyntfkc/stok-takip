@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stok Takip Sistemi
 
-## Getting Started
+İndigo Takı için geliştirilmiş stok takip ve üretim yönetim sistemi.
 
-First, run the development server:
+## Özellikler
 
+- **3 Kullanıcı Rolü**: Yönetici, Operasyon, Atölye
+- **Ürün Yönetimi**: CSV içe aktarım, QR kod oluşturma, arama ve filtreleme
+- **Stok Yönetimi**: Manuel giriş/çıkış, QR kod ile hızlı işlem
+- **Sipariş Yönetimi**: Sipariş oluşturma, üretim takibi
+- **Kanban Üretim Akışı**: 6 aşamalı üretim süreci takibi
+- **Otomatik Stok Güncelleme**: Sipariş tamamlandığında stok otomatik artar
+- **Raporlama**: Günlük/haftalık/aylık üretim raporları ve grafikler
+
+## Teknoloji Stack
+
+- **Frontend/Backend**: Next.js 14+ (App Router)
+- **Veritabanı**: PostgreSQL (Prisma ORM)
+- **Styling**: TailwindCSS + shadcn/ui
+- **Authentication**: NextAuth.js
+- **QR Kod**: qrcode, html5-qrcode
+- **CSV İşleme**: papaparse
+- **Grafikler**: recharts
+
+## Kurulum
+
+1. Bağımlılıkları yükleyin:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. `.env` dosyasını oluşturun:
+```bash
+cp .env.example .env
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. `.env` dosyasında veritabanı bağlantısını yapılandırın:
+```
+DATABASE_URL="postgresql://user:password@localhost:5432/stok_takip?schema=public"
+NEXTAUTH_SECRET="your-secret-key-here"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Veritabanını oluşturun ve migrate edin:
+```bash
+npx prisma migrate dev
+```
 
-## Learn More
+5. Demo verileri yükleyin:
+```bash
+npm run db:seed
+```
 
-To learn more about Next.js, take a look at the following resources:
+6. Geliştirme sunucusunu başlatın:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Demo Kullanıcılar
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Seed script çalıştırıldıktan sonra aşağıdaki kullanıcılarla giriş yapabilirsiniz:
 
-## Deploy on Vercel
+- **Yönetici**: admin@indigo.com / admin123
+- **Operasyon**: operation@indigo.com / operation123
+- **Atölye**: workshop@indigo.com / workshop123
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Üretim Aşamaları
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Döküme Gönderilecek (PENDING_CASTING)
+2. Mum Basılıyor (WAX_PRESSING)
+3. Dökümde (CASTING)
+4. Tezgah (BENCH)
+5. Cila (POLISHING)
+6. Paketleme (PACKAGING)
+7. Tamamlandı (COMPLETED)
+
+## Proje Yapısı
+
+```
+stok-takip/
+├── app/
+│   ├── (auth)/          # Authentication sayfaları
+│   ├── (dashboard)/     # Dashboard sayfaları
+│   └── api/             # API routes
+├── components/          # React componentleri
+├── lib/                 # Utility fonksiyonları
+├── prisma/              # Prisma schema ve migrations
+└── public/              # Static dosyalar
+```
+
+## Lisans
+
+Bu proje özel bir projedir.

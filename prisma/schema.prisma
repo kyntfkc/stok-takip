@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  OPERATION
+  WORKSHOP
+}
+
+enum OrderStatus {
+  NEW
+  IN_PRODUCTION
+  COMPLETED
+  CANCELLED
+}
+
+enum StockTransactionType {
+  IN
+  OUT
+}
+
+enum ProductionStage {
+  TO_PRODUCE
+  WAX_PRESSING
+  WAX_READY
+  CASTING
+  BENCH
+  POLISHING
+  PACKAGING
+  COMPLETED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  name      String?
+  role      Role     @default(WORKSHOP)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stockTransactions StockTransaction[]
+  orders            Order[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  name          String
+  sku           String   @unique
+  weight        Float?   // gram cinsinden
+  currentStock  Int      @default(0)
+  qrCode        String?  @unique
+  description   String?
+  categoryId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category          Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  orderItems        OrderItem[]
+  stockTransactions StockTransaction[]
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  orderNumber  String      @unique
+  customerName String?
+  status       OrderStatus @default(NEW)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  completedAt  DateTime?
+  userId       String?
+
+  user      User?       @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  status    ProductionStage @default(TO_PRODUCE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order         Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product       Product          @relation(fields: [productId], references: [id])
+  productionStages ProductionStageHistory[]
+}
+
+model ProductionStageHistory {
+  id            String          @id @default(cuid())
+  orderItemId   String
+  stage         ProductionStage
+  createdAt     DateTime        @default(now())
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+}
+
+model StockTransaction {
+  id        String              @id @default(cuid())
+  productId String
+  type      StockTransactionType
+  quantity  Int
+  reason    String?
+  userId    String?
+  createdAt DateTime            @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+}
+
+model Setting {
+  key       String   @id @unique
+  value     String   // JSON string olarak saklanacak
+  updatedAt DateTime @updatedAt
+}
