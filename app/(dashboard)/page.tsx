@@ -7,6 +7,7 @@ import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
 import { StockStats } from "@/components/dashboard/StockStats"
 import { prisma } from "@/lib/prisma"
 import { Skeleton } from "@/components/ui/skeleton"
+import type { StockTransactionType } from "@/lib/types"
 
 // Cache'lenmiş dashboard stats fonksiyonu
 const getCachedDashboardStats = unstable_cache(
@@ -98,12 +99,12 @@ export default async function DashboardPage() {
 
   // Günlük istatistikleri hesapla
   const todayIn = todayTransactions
-    .filter((t) => t.type === "IN")
-    .reduce((sum, t) => sum + t.quantity, 0)
+    .filter((t: { type: StockTransactionType; quantity: number }) => t.type === "IN")
+    .reduce((sum: number, t: { type: StockTransactionType; quantity: number }) => sum + t.quantity, 0)
   
   const todayOut = todayTransactions
-    .filter((t) => t.type === "OUT")
-    .reduce((sum, t) => sum + t.quantity, 0)
+    .filter((t: { type: StockTransactionType; quantity: number }) => t.type === "OUT")
+    .reduce((sum: number, t: { type: StockTransactionType; quantity: number }) => sum + t.quantity, 0)
 
   return (
     <>

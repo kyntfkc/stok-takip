@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
-import { Prisma, ProductionStage, OrderStatus } from "@prisma/client"
+import { Prisma } from "@prisma/client"
+import type { ProductionStage, OrderStatus } from "@/lib/types"
 
 const orderSchema = z.object({
   items: z.array(

@@ -2,11 +2,11 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
-import { ProductionStage } from "@prisma/client"
+import type { ProductionStage } from "@/lib/types"
 
 const bulkStageSchema = z.object({
   itemIds: z.array(z.string()).min(1, "En az bir ürün seçilmelidir"),
-  stage: z.nativeEnum(ProductionStage),
+  stage: z.enum(["TO_PRODUCE", "WAX_PRESSING", "WAX_READY", "CASTING", "BENCH", "POLISHING", "PACKAGING", "COMPLETED"]),
 })
 
 export async function POST(request: Request) {
@@ -40,7 +40,8 @@ export async function POST(request: Request) {
     }
 
     // Transaction içinde toplu güncelleme
-    const result = await prisma.$transaction(async (tx) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await prisma.$transaction(async (tx: any) => {
       // Her item için aşama geçmişine ekle
       await Promise.all(
         items.map((item) =>
