@@ -189,7 +189,7 @@ export async function POST(request: Request) {
           create: validatedData.items.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
-            status: ProductionStage.TO_PRODUCE,
+            status: "TO_PRODUCE" as ProductionStage,
           })),
         },
       },
