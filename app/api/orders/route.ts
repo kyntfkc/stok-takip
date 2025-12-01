@@ -30,8 +30,8 @@ export async function GET(request: Request) {
     const where: Prisma.OrderWhereInput = {}
     if (status) {
       // OrderStatus enum değerlerini kontrol et
-      const validStatuses = Object.values(OrderStatus) as string[]
-      if (validStatuses.includes(status)) {
+      const validStatuses: OrderStatus[] = ["NEW", "IN_PRODUCTION", "COMPLETED", "CANCELLED"]
+      if (validStatuses.includes(status as OrderStatus)) {
         where.status = status as OrderStatus
       } else {
         return NextResponse.json(
