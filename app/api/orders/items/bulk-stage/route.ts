@@ -76,7 +76,7 @@ export async function POST(request: Request) {
           })
 
           const allCompleted = orderItems.every(
-            (item) => item.status === "COMPLETED"
+            (item: { status: string }) => item.status === "COMPLETED"
           )
 
           if (allCompleted) {
