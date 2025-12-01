@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const result = await prisma.$transaction(async (tx: any) => {
       // Her item için aşama geçmişine ekle
       await Promise.all(
-        items.map((item) =>
+        items.map((item: { id: string }) =>
           tx.productionStageHistory.create({
             data: {
               orderItemId: item.id,
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
 
       // Eğer COMPLETED ise, siparişleri kontrol et
       if (validatedData.stage === "COMPLETED") {
-        const orderIds = [...new Set(items.map((item) => item.orderId))]
+        const orderIds = [...new Set(items.map((item: { orderId: string }) => item.orderId))]
 
         for (const orderId of orderIds) {
           const orderItems = await tx.orderItem.findMany({
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
               })
 
               // Stokları güncelle
-              for (const item of orderItems) {
+              for (const item of orderItems as Array<{ productId: string; quantity: number }>) {
                 await tx.product.update({
                   where: { id: item.productId },
                   data: {
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
         }
       } else {
         // Üretime başlandıysa sipariş durumunu güncelle
-        const orderIds = [...new Set(items.map((item) => item.orderId))]
+        const orderIds = [...new Set(items.map((item: { orderId: string }) => item.orderId))]
 
         for (const orderId of orderIds) {
           const order = await tx.order.findUnique({
