@@ -18,8 +18,8 @@ import {
   X
 } from "lucide-react"
 import { toast } from "sonner"
-import { Html5Qrcode } from "html5-qrcode"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 interface Product {
   id: string
@@ -30,12 +30,13 @@ interface Product {
 }
 
 export default function OperationsPage() {
-  const [scanning, setScanning] = useState(false)
+  const router = useRouter()
+  const [scanning, setScanning] = useState(true)
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState("1")
   const [loading, setLoading] = useState(false)
   const [lastTransaction, setLastTransaction] = useState<{ type: "IN" | "OUT"; quantity: number; productName: string } | null>(null)
-  const scannerRef = useRef<Html5Qrcode | null>(null)
+  const scannerRef = useRef<any>(null)
   const qrCodeRegionId = "qr-reader"
 
   const loadProduct = async (sku: string) => {
@@ -49,8 +50,8 @@ export default function OperationsPage() {
         return
       }
 
-      setProduct(foundProduct)
-      setQuantity("1")
+      // Ürün detay sayfasına yönlendir
+      router.push(`/products/${foundProduct.id}`)
     } catch (error) {
       toast.error("Ürün yüklenirken hata oluştu")
     }
@@ -79,14 +80,19 @@ export default function OperationsPage() {
       }
 
       try {
+        // html5-qrcode kütüphanesini dynamic import ile yükle
+        const { Html5Qrcode } = await import("html5-qrcode")
         const html5QrCode = new Html5Qrcode(qrCodeRegionId)
         scannerRef.current = html5QrCode
 
+        // Mobil ve desktop için merkezi kutu
+        const isMobile = window.innerWidth < 768
         await html5QrCode.start(
           { facingMode: "environment" },
           {
             fps: 10,
-            qrbox: { width: 300, height: 300 },
+            qrbox: isMobile ? { width: 250, height: 250 } : { width: 300, height: 300 },
+            aspectRatio: 1.0,
           },
           async (decodedText) => {
             try {
@@ -192,21 +198,22 @@ export default function OperationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-50 px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-      <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
-        {/* Başlık */}
-        <div className="text-center sm:text-left">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Operasyonel İşlemler
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            QR kod okutarak hızlı stok işlemi yapın
-          </p>
-        </div>
+    <div className="-m-6 md:m-0">
+      {/* Mobil için başlık gizle, desktop için göster */}
+      <div className="hidden md:block mb-6 px-6">
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Operasyonel İşlemler
+        </h1>
+        <p className="mt-2 text-sm text-gray-600">
+          QR kod okutarak hızlı stok işlemi yapın
+        </p>
+      </div>
+
+      <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6 px-0 md:px-0">
 
         {/* Son İşlem */}
         {lastTransaction && (
-          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg">
+          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg mx-4 md:mx-0">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -241,36 +248,29 @@ export default function OperationsPage() {
 
         {/* QR Kod Okutma */}
         {!product && (
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-slate-200/60">
-            <CardHeader>
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-slate-200/60 md:border md:shadow-lg md:bg-white/80 mx-0 md:mx-0">
+            <CardHeader className="hidden md:block">
               <CardTitle className="flex items-center gap-2">
                 <QrCode className="h-5 w-5" />
                 QR Kod Okut
               </CardTitle>
               <CardDescription>Ürün QR kodunu tarayın</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {!scanning && (
-                <Button 
-                  onClick={() => setScanning(true)} 
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-h-[60px] text-lg"
-                >
-                  <Camera className="h-6 w-6 mr-2" />
-                  Kamerayı Başlat
-                </Button>
-              )}
-
+            <CardContent className="space-y-4 p-0 md:p-6">
               {scanning && (
                 <div className="space-y-4">
                   <div 
                     id={qrCodeRegionId} 
-                    className="w-full rounded-lg overflow-hidden"
-                    style={{ minHeight: "300px" }}
+                    className="w-full rounded-lg overflow-hidden md:rounded-xl"
+                    style={{ 
+                      minHeight: "400px",
+                      maxHeight: "500px"
+                    }}
                   />
                   <Button 
                     onClick={stopScanning} 
                     variant="outline" 
-                    className="w-full rounded-xl min-h-[50px] text-base"
+                    className="w-full rounded-xl min-h-[56px] md:min-h-[50px] text-base md:text-base"
                   >
                     Taramayı Durdur
                   </Button>
@@ -282,7 +282,7 @@ export default function OperationsPage() {
 
         {/* Ürün Bilgileri ve İşlemler */}
         {product && (
-          <div className="space-y-4">
+          <div className="space-y-4 px-4 md:px-0 pb-4 md:pb-0">
             <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-slate-200/60">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -340,7 +340,7 @@ export default function OperationsPage() {
                         type="button"
                         variant={quantity === val.toString() ? "default" : "outline"}
                         onClick={() => quickQuantity(val)}
-                        className={`rounded-xl min-h-[50px] ${
+                        className={`rounded-xl min-h-[56px] md:min-h-[50px] text-lg md:text-base ${
                           quantity === val.toString()
                             ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
                             : ""
@@ -358,26 +358,26 @@ export default function OperationsPage() {
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
                     placeholder="Miktar girin"
-                    className="text-center text-lg py-3 rounded-xl"
+                    className="text-center text-xl md:text-lg py-4 md:py-3 rounded-xl min-h-[56px] md:min-h-[48px]"
                   />
                 </div>
 
                 {/* İşlem Butonları */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <Button
                     onClick={() => handleTransaction("IN")}
                     disabled={loading || !quantity || parseInt(quantity) < 1}
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-h-[70px] text-lg font-semibold"
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-h-[80px] md:min-h-[70px] text-xl md:text-lg font-semibold touch-action-manipulation"
                   >
-                    <Plus className="h-6 w-6 mr-2" />
+                    <Plus className="h-7 w-7 md:h-6 md:w-6 mr-2" />
                     Stok Ekle
                   </Button>
                   <Button
                     onClick={() => handleTransaction("OUT")}
                     disabled={loading || !quantity || parseInt(quantity) < 1 || product.currentStock < parseInt(quantity)}
-                    className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-h-[70px] text-lg font-semibold disabled:opacity-50"
+                    className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-h-[80px] md:min-h-[70px] text-xl md:text-lg font-semibold disabled:opacity-50 touch-action-manipulation"
                   >
-                    <Minus className="h-6 w-6 mr-2" />
+                    <Minus className="h-7 w-7 md:h-6 md:w-6 mr-2" />
                     Stok Çıkar
                   </Button>
                 </div>
@@ -393,9 +393,9 @@ export default function OperationsPage() {
                 <Button
                   onClick={reset}
                   variant="outline"
-                  className="w-full rounded-xl min-h-[50px] text-base"
+                  className="w-full rounded-xl min-h-[56px] md:min-h-[50px] text-lg md:text-base touch-action-manipulation"
                 >
-                  <QrCode className="h-5 w-5 mr-2" />
+                  <QrCode className="h-6 w-6 md:h-5 md:w-5 mr-2" />
                   Yeni QR Kod Okut
                 </Button>
               </CardContent>

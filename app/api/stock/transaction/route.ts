@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { checkAndNotifyLowStock } from "@/lib/notifications/telegram"
 
 const transactionSchema = z.object({
   productId: z.string(),
@@ -62,6 +63,11 @@ export async function POST(request: Request) {
         data: { currentStock: newStock },
       }),
     ])
+
+    // Düşük stok kontrolü ve bildirim gönderme (asenkron, hata durumunda işlemi etkilemez)
+    checkAndNotifyLowStock(validatedData.productId).catch((error) => {
+      console.error("Bildirim gönderme hatası:", error)
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

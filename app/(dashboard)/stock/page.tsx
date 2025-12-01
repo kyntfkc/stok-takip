@@ -1,11 +1,11 @@
-import { auth } from "@/app/api/auth/[...nextauth]/route"
+import { getServerSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { StockOperations } from "@/components/stock/StockOperations"
 import { StockHistory } from "@/components/stock/StockHistory"
 import { prisma } from "@/lib/prisma"
 
 export default async function StockPage() {
-  const session = await auth()
+  const session = await getServerSession()
 
   if (!session) {
     redirect("/login")
@@ -33,7 +33,7 @@ export default async function StockPage() {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-50 px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6">
+    <>
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
           Stok Yönetimi
@@ -47,7 +47,7 @@ export default async function StockPage() {
         <StockOperations />
         <StockHistory transactions={transactions} />
       </div>
-    </div>
+    </>
   )
 }
 

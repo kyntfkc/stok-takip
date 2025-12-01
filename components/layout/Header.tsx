@@ -49,7 +49,11 @@ export function Header({ user }: HeaderProps) {
           <span className="text-sm text-gray-600">{getRoleName(user.role)}</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Button 
+                variant="ghost" 
+                className="relative h-8 w-8 rounded-full"
+                aria-label="Kullanıcı menüsü"
+              >
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>

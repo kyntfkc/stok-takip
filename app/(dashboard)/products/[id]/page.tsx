@@ -25,7 +25,7 @@ export default async function ProductDetailPage({
     include: {
       category: true,
       stockTransactions: {
-        take: 20,
+        take: 10,
         orderBy: {
           createdAt: "desc",
         },
@@ -46,10 +46,10 @@ export default async function ProductDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-50 px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6">
+    <>
       <div className="flex items-center gap-4 mb-6">
         <Link href="/products">
-          <Button variant="ghost" size="sm" className="rounded-xl">
+          <Button variant="ghost" size="sm" className="rounded-lg">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Geri
           </Button>
@@ -61,7 +61,7 @@ export default async function ProductDetailPage({
       </div>
 
       <ProductDetail product={product} />
-    </div>
+    </>
   )
 }
 

@@ -5,6 +5,7 @@ import { QRCodeDisplay } from "@/components/products/QRCodeDisplay"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
+import { getProductImageUrl } from "@/lib/utils"
 
 export default async function ProductQRPage({
   params,
@@ -64,7 +65,12 @@ export default async function ProductQRPage({
         </div>
       </div>
 
-      <QRCodeDisplay product={product} />
+      <QRCodeDisplay 
+        product={{
+          ...product,
+          imageUrl: product.imageUrl || getProductImageUrl(product.name, product.sku),
+        }}
+      />
     </div>
   )
 }

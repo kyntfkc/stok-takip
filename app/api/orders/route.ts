@@ -13,6 +13,8 @@ const orderSchema = z.object({
   ).min(1),
 })
 
+export const revalidate = 60 // 60 saniye cache
+
 export async function GET(request: Request) {
   try {
     const session = await getServerSession()
@@ -40,10 +42,29 @@ export async function GET(request: Request) {
 
     const orders = await prisma.order.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        customerName: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        completedAt: true,
         orderItems: {
-          include: {
-            product: true,
+          select: {
+            id: true,
+            quantity: true,
+            status: true,
+            note: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                sku: true,
+                imageUrl: true,
+                currentStock: true,
+              },
+            },
           },
         },
       },

@@ -1,12 +1,14 @@
 {
   "name": "Stok Takip Sistemi",
   "short_name": "Stok Takip",
-  "description": "Indigo Taki Stok Takip Sistemi",
+  "description": "İndigo Takı Stok Takip ve Üretim Yönetim Sistemi",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -19,6 +21,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Stok Girişi",
+      "short_name": "Giriş",
+      "description": "Hızlı stok girişi yap",
+      "url": "/stock",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "QR Tarama",
+      "short_name": "QR",
+      "description": "QR kod ile stok işlemi",
+      "url": "/operations",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Üretim",
+      "short_name": "Üretim",
+      "description": "Üretim akışını görüntüle",
+      "url": "/orders/production",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

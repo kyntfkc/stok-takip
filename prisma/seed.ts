@@ -60,14 +60,14 @@ async function main() {
 
   // Ürünler oluştur
   const products = [
-    { name: "Altın Yüzük", sku: "ALT-YZK-001", weight: 5.5, stock: 25 },
-    { name: "Gümüş Kolye", sku: "GUM-KLY-001", weight: 12.3, stock: 15 },
-    { name: "Altın Küpe", sku: "ALT-KPE-001", weight: 3.2, stock: 30 },
-    { name: "Gümüş Bilezik", sku: "GUM-BLZ-001", weight: 18.7, stock: 20 },
-    { name: "Altın Bilezik", sku: "ALT-BLZ-001", weight: 22.1, stock: 10 },
-    { name: "Gümüş Yüzük", sku: "GUM-YZK-001", weight: 4.8, stock: 18 },
-    { name: "Altın Kolye", sku: "ALT-KLY-001", weight: 15.5, stock: 12 },
-    { name: "Gümüş Küpe", sku: "GUM-KPE-001", weight: 2.9, stock: 28 },
+    { name: "Altın Yüzük", sku: "ALT-YZK-001", weight: 5.5, stock: 25, imageUrl: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=400&h=400&fit=crop" },
+    { name: "Gümüş Kolye", sku: "GUM-KLY-001", weight: 12.3, stock: 15, imageUrl: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop" },
+    { name: "Altın Küpe", sku: "ALT-KPE-001", weight: 3.2, stock: 30, imageUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=400&fit=crop" },
+    { name: "Gümüş Bilezik", sku: "GUM-BLZ-001", weight: 18.7, stock: 20, imageUrl: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=400&fit=crop" },
+    { name: "Altın Bilezik", sku: "ALT-BLZ-001", weight: 22.1, stock: 10, imageUrl: "https://images.unsplash.com/photo-1611955167811-4711904bb9f0?w=400&h=400&fit=crop" },
+    { name: "Gümüş Yüzük", sku: "GUM-YZK-001", weight: 4.8, stock: 18, imageUrl: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop" },
+    { name: "Altın Kolye", sku: "ALT-KLY-001", weight: 15.5, stock: 12, imageUrl: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop" },
+    { name: "Gümüş Küpe", sku: "GUM-KPE-001", weight: 2.9, stock: 28, imageUrl: "https://images.unsplash.com/photo-1611955167811-4711904bb9f0?w=400&h=400&fit=crop" },
   ]
 
   const createdProducts = []
@@ -87,6 +87,7 @@ async function main() {
         weight: product.weight,
         currentStock: product.stock,
         qrCode: qrCode,
+        imageUrl: product.imageUrl,
       },
     })
     createdProducts.push(created)

@@ -88,7 +88,7 @@ export default function NewProductPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="weight">Ağırlık (gram)</Label>
+              <Label htmlFor="weight">Ağırlık (1 adet, gram)</Label>
               <Input
                 id="weight"
                 type="number"
@@ -112,10 +112,10 @@ export default function NewProductPage() {
             <div className="flex gap-2">
               <Button 
                 type="submit" 
-                disabled={loading}
+                loading={loading}
                 className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
               >
-                {loading ? "Oluşturuluyor..." : "Oluştur"}
+                Oluştur
               </Button>
               <Button
                 type="button"

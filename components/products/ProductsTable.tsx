@@ -12,10 +12,12 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Search, QrCode, Eye, Download } from "lucide-react"
+import { Search, QrCode, Eye, Download, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { toJpeg } from "html-to-image"
+import Image from "next/image"
+import { getProductImageUrl } from "@/lib/utils"
+import { EmptyState } from "@/components/ui/empty-state"
 
 interface Product {
   id: string
@@ -24,6 +26,7 @@ interface Product {
   weight: number | null
   currentStock: number
   qrCode: string | null
+  imageUrl: string | null
   category: {
     id: string
     name: string
@@ -153,6 +156,9 @@ export function ProductsTable({ products }: ProductsTableProps) {
         // Kısa bir bekleme (resimlerin yüklenmesi ve layout için)
         await new Promise((resolve) => setTimeout(resolve, 100))
 
+        // html-to-image kütüphanesini dynamic import ile yükle
+        const { toJpeg } = await import("html-to-image")
+        
         const dataUrl = await toJpeg(labelElement, {
           quality: 0.95,
           backgroundColor: "#ffffff",
@@ -183,128 +189,144 @@ export function ProductsTable({ products }: ProductsTableProps) {
   const allSelected = productsWithQR.length > 0 && productsWithQR.every((p) => selectedProducts.has(p.id))
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
         <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
           <Input
             placeholder="Ürün adı veya SKU ile ara..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-8 h-8 text-xs"
+            aria-label="Ürün ara"
           />
         </div>
         {productsWithQR.length > 0 && (
           <Button
             onClick={handleBulkDownload}
             disabled={isDownloading || selectedProducts.size === 0}
-            className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] px-4"
+            className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-md shadow-sm hover:shadow transition-all duration-200 min-h-[32px] px-2 text-xs"
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-3 w-3 mr-1.5" />
             {isDownloading
               ? "İndiriliyor..."
-              : `Seçili Etiketleri İndir (${selectedProducts.size})`}
+              : `İndir (${selectedProducts.size})`}
           </Button>
         )}
       </div>
 
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border border-slate-200/60 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                {productsWithQR.length > 0 && (
-                  <Checkbox
-                    checked={allSelected}
-                    onCheckedChange={toggleAllSelection}
-                  />
-                )}
-              </TableHead>
-              <TableHead>Ürün Adı</TableHead>
-              <TableHead>SKU</TableHead>
-              <TableHead>Kategori</TableHead>
-              <TableHead>Ağırlık (g)</TableHead>
-              <TableHead className="text-right">Stok</TableHead>
-              <TableHead className="text-center">Durum</TableHead>
-              <TableHead className="text-center">İşlemler</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProducts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                  {searchTerm ? "Arama sonucu bulunamadı" : "Henüz ürün eklenmemiş"}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    {product.qrCode && (
+      {/* Kart Görünümü */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
+        {filteredProducts.length === 0 ? (
+          <div className="col-span-full">
+            <EmptyState
+              icon={<ImageIcon className="w-12 h-12 text-gray-300" />}
+              title={searchTerm ? "Arama sonucu bulunamadı" : "Henüz ürün eklenmemiş"}
+              description={searchTerm ? "Farklı bir arama terimi deneyin" : "İlk ürününüzü ekleyerek başlayın"}
+              action={
+                !searchTerm
+                  ? {
+                      label: "Yeni Ürün Ekle",
+                      onClick: () => window.location.href = "/products/new",
+                    }
+                  : undefined
+              }
+            />
+          </div>
+        ) : (
+          filteredProducts.map((product) => {
+            const imageUrl = product.imageUrl || getProductImageUrl(product.name, product.sku)
+            const isSelected = selectedProducts.has(product.id)
+            
+            return (
+              <div
+                key={product.id}
+                className={`group bg-white rounded-md shadow-sm border overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.01] ${
+                  isSelected ? "border-blue-500 ring-1 ring-blue-200" : "border-slate-200"
+                }`}
+              >
+                {/* Ürün Görseli */}
+                <div className="relative aspect-square bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
+                  {product.qrCode && (
+                    <div className="absolute top-1 left-1 z-10">
                       <Checkbox
-                        checked={selectedProducts.has(product.id)}
+                        checked={isSelected}
                         onCheckedChange={() => toggleProductSelection(product.id)}
+                        className="bg-white/90 backdrop-blur-sm w-4 h-4"
                       />
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell className="text-gray-600">{product.sku}</TableCell>
-                  <TableCell>
-                    {product.category ? (
-                      <Badge variant="outline">{product.category.name}</Badge>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>{product.weight ? `${product.weight} g` : "-"}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    {product.currentStock}
-                  </TableCell>
-                  <TableCell className="text-center">
+                    </div>
+                  )}
+                  <Image
+                    src={imageUrl}
+                    alt={product.name}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    unoptimized={imageUrl.includes('unsplash.com') || imageUrl.includes('via.placeholder.com')}
+                  />
+                  {/* Stok Durumu Badge */}
+                  <div className="absolute top-1 right-1">
                     <Badge
-                      variant={
+                      className={`text-[10px] px-1 py-0 ${
                         product.currentStock === 0
-                          ? "destructive"
+                          ? "bg-red-500 text-white"
                           : product.currentStock <= 10
-                          ? "secondary"
-                          : "default"
-                      }
-                      className={
-                        product.currentStock === 0
-                          ? "bg-red-500"
-                          : product.currentStock <= 10
-                          ? "bg-orange-500"
-                          : "bg-green-500"
-                      }
+                          ? "bg-orange-500 text-white"
+                          : "bg-green-500 text-white"
+                      }`}
                     >
                       {product.currentStock === 0
                         ? "Tükendi"
                         : product.currentStock <= 10
                         ? "Düşük"
-                        : "Normal"}
+                        : product.currentStock}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <Link href={`/products/${product.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
+                  </div>
+                </div>
+
+                {/* Ürün Bilgileri */}
+                <div className="p-2 space-y-1">
+                  <div>
+                    <h3 className="font-semibold text-slate-900 text-xs line-clamp-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">SKU: {product.sku}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px]">
+                    {product.category && (
+                      <Badge variant="outline" className="text-[10px] px-1 py-0">
+                        {product.category.name}
+                      </Badge>
+                    )}
+                    {product.weight && (
+                      <span className="text-slate-600 font-medium text-[10px]">
+                        {product.weight}g
+                      </span>
+                    )}
+                  </div>
+
+                  {/* İşlem Butonları */}
+                  <div className="flex items-center gap-1 pt-1 border-t border-slate-100">
+                    <Link href={`/products/${product.id}`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full h-6 text-[10px] px-1.5">
+                        <Eye className="h-2.5 w-2.5 mr-0.5" />
+                        Detay
+                      </Button>
+                    </Link>
+                    {product.qrCode && (
+                      <Link href={`/products/${product.id}/qr`}>
+                        <Button variant="outline" size="sm" className="h-6 w-6 p-0">
+                          <QrCode className="h-2.5 w-2.5" />
                         </Button>
                       </Link>
-                      {product.qrCode && (
-                        <Link href={`/products/${product.id}/qr`}>
-                          <Button variant="ghost" size="sm">
-                            <QrCode className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
   )

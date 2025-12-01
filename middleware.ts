@@ -3,12 +3,23 @@ import type { NextRequest } from "next/server"
 import { getToken } from "next-auth/jwt"
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  
+  // Public dosyalarına erişime izin ver (logo, icon, vb.)
+  if (
+    pathname.startsWith("/logo.png") ||
+    pathname.startsWith("/icon-") ||
+    pathname.match(/\.(png|jpg|jpeg|svg|gif|ico|webp)$/i)
+  ) {
+    return NextResponse.next()
+  }
+
   const token = await getToken({ 
     req: request,
     secret: process.env.NEXTAUTH_SECRET 
   })
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login")
+  const isAuthPage = pathname.startsWith("/login")
   
   // Eğer login sayfasındaysa ve zaten giriş yapmışsa ana sayfaya yönlendir
   if (isAuthPage) {

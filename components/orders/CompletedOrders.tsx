@@ -5,6 +5,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ShoppingCart } from "lucide-react"
 
 interface Order {
   id: string
@@ -46,14 +49,30 @@ export function CompletedOrders() {
   }
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => (
+          <Card key={i}>
+            <CardContent className="p-6">
+              <Skeleton className="h-6 w-32 mb-4" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
   }
 
   if (orders.length === 0) {
     return (
       <Card>
-        <CardContent className="text-center py-12">
-          <p className="text-gray-500">Henüz tamamlanan üretim talebi bulunmuyor</p>
+        <CardContent className="py-12">
+          <EmptyState
+            icon={<ShoppingCart className="w-12 h-12 text-gray-300" />}
+            title="Henüz tamamlanan üretim talebi bulunmuyor"
+            description="Tamamlanan üretim talepleri burada görüntülenecek"
+          />
         </CardContent>
       </Card>
     )

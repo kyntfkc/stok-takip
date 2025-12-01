@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -73,6 +73,7 @@ model Product {
   weight        Float?   // gram cinsinden
   currentStock  Int      @default(0)
   qrCode        String?  @unique
+  imageUrl      String?  // Ürün görseli URL'i
   description   String?
   categoryId    String?
   createdAt     DateTime @default(now())
@@ -103,6 +104,7 @@ model OrderItem {
   productId String
   quantity  Int
   status    ProductionStage @default(TO_PRODUCE)
+  note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -11,6 +11,8 @@ const productSchema = z.object({
   description: z.string().optional(),
 })
 
+export const revalidate = 60 // 60 saniye cache
+
 export async function GET(request: Request) {
   try {
     let session
@@ -33,8 +35,21 @@ export async function GET(request: Request) {
       orderBy: {
         name: "asc",
       },
-      include: {
-        category: true,
+      select: {
+        id: true,
+        name: true,
+        sku: true,
+        weight: true,
+        currentStock: true,
+        qrCode: true,
+        imageUrl: true,
+        description: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     })
 
